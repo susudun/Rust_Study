@@ -21,7 +21,7 @@
 //   next level.
 use std::collections::HashMap;
 use std::io;
-use std::num::ParseFloatError;
+
 #[derive(Debug,Clone)]
 struct BillOptions {
     name: String,
@@ -45,32 +45,45 @@ fn print_beginning() {
     println!("5. Exit");
 }
 
-fn get_user_mune_input() -> Result<f32,ParseFloatError> {
+fn get_user_mune_number_input() -> i8 {
     let mut input = String::new();
-    io::stdin().read_line(&mut input);
-    let checking_number  = input.trim().parse::<f32>();
-    match checking_number {
-        Ok(number) => Ok(number),
-        Err(_)=> {
-            println!("only numbers are allowed, please try again.");
-            get_user_mune_input()
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+    match input.trim().parse::<i8>() {
+        Ok(number) => return number,
+        Err(e)=> println!("Error parsing input: {}", e),
+    }
+    return 0
+}
+
+fn set_menu_choice(number : i8, &mut bill:BillOptions) {
+    match number {
+        1 => {
+            let mut name = String::new();
+            let mut amount = String::new();
+            println!("Enter billname:");
+            io::stdin().read_line(&mut name).expect("Failed to read line");
+            println!("Enter amount owed:");
+            io::stdin().read_line(&mut amount).expect("Failed to read line");
+            match amount.trim().parse::<f32>(){
+                Ok (amount_value) => {
+                    if ()
+                }
+            }
         }
     }
 }
 
 fn main() {
-    let mut bills : Vec<&HashMap<String,f32>> = Vec::new();
     let mut bill_map : HashMap<String,f32> = HashMap::new();
     let mut bill_options: BillOptions = BillOptions {
         name: "OldBill".to_string(),
         amount: 0.0,
     };
+    let mut menu_choice: i8 = 0;
     bill_map.insert(bill_options.name,bill_options.amount);
-    bills.push(&bill_map);
     loop {
         print_beginning();
-    
+        menu_choice = get_user_mune_number_input();
         break;
     }
 }
-
