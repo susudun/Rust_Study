@@ -27,7 +27,7 @@
 use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::collections::HashMap;
-use std::{io, string};
+use std::io::*;
 const DATA_PATH : &str = "C:/Users/KGA/Downloads/activities/data/p2_data_Backup.csv";
 #[derive(Debug)]
 struct ContactStruct{
@@ -102,6 +102,27 @@ impl ConstactsStruct {
         }
     }
 
+    fn  find_and_edit_constact(&mut self){
+        println!("Find id Number Give me");
+        let number = input_number();
+        match self.Book.get_mut(&number) {
+            Some(data) =>  {
+                println!("Fine Data :  {:?}",data);
+                println!("Edit?(0:Yes / 1:NO) : ");
+                let edit_input = input_number();
+                if edit_input == 0 {
+                    println!("Before name {} and Change name :",data.name);
+                    data.name = input_string();
+                    println!("Before email {:?} and Change email :",data.email);
+                    data.email = Some(input_string());
+                } else {
+                    println!("Exit Edit");
+                }
+            },
+            None => println!("Exit Edit"),
+        };
+    }
+
    
 }
 
@@ -119,6 +140,14 @@ fn input_number()-> i32 {
         }
     }
 }
+fn input_string()-> String {
+    let mut input : String = String::new();
+    if io::stdin().read_line(&mut input).is_err(){
+        println!("read_line Error");
+        return "False".to_string()
+    }
+    input.to_string()
+}
 fn print_menu (){
     println!("1. 조회 ");
     println!("2. 추가 ");
@@ -126,28 +155,60 @@ fn print_menu (){
     println!("4. 프로그램 종료");
 }
 
- fn menu_controller (database:&mut ConstactsStruct,number : i32) {
+ fn menu_controller (database:&mut ConstactsStruct,number : i32,exit_number : &mut bool) {
         match number {
             1 => database.print_constacts(),
-            2 => 
-            3 =>
-            4 => break,
+            2 => match create_contact(database) {
+                Ok(_) => println!("Add True"),
+                Err(_)=> println!("Add False"),
+            },
+            3 => database.find_and_edit_constact(),
+            4 => *exit_number = true,
             _ => println!("in a 1,2,3,4 give me")
         }
     }
 
- fn create_contact()-> ContactStruct {
-    let mut 
+ fn create_contact(database:&mut ConstactsStruct)->Result<()>{
+    let mut input : String = String::new();
+    let mut input_id : i32 = -1;
+    let mut input_name : String = String::new();
+    let mut input_email : Option<String> = None;
+    println!("Give ID:");
+    io::stdin().read_line(&mut input)?;
+    match input.trim().parse::<i32>() {
+        Ok(data) => input_id = data,
+        Err(_e) => println!("Error"),
+    };
+    input = String::new();
+     println!("Give name:");
+    io::stdin().read_line(&mut input)?;
+    input_name = input.trim().to_string();
+    input = String::new();
+     println!("Give Email:");
+    match  io::stdin().read_line(&mut input) {
+        Ok(_) => input_email = Some(input.trim().to_string()),
+        Err(_e) => input_email = None,
+    };
+    let create_consracr = ContactStruct{ 
+        id :input_id,
+        name : input_name,
+        email : input_email,
+    };
+    database.add(create_consracr);
+    Ok(())
  }
 
 fn main() {
     let mut mybe_test = ConstactsStruct::new();
-    mybe_test.get_constacts_Data(DATA_PATH);
-
+   if let Err(e) = mybe_test.get_constacts_Data(DATA_PATH){
+        eprintln!("파일 읽기 실패: {e}");
+    }
+    let mut exit_number : bool = false;
     loop {
         print_menu();
-        
-
+        menu_controller(&mut mybe_test,input_number(),&mut exit_number);
+        if exit_number {
+            break;
+        }
     }
-
 }
